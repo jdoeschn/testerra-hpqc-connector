@@ -739,7 +739,14 @@ public final class QcRestClient {
             Response putResponse = connector.httpPut(restUrl,
                     MarshallingUtils.unmarshal(Entity.class, change.getEntity()).getBytes(),
                     headers);
-            Entity entity = MarshallingUtils.marshal(Entity.class, putResponse.toString());
+            Entity entity;
+            if(putResponse.toString().contains("Entity")) {           	
+            	entity = MarshallingUtils.marshal(Entity.class, putResponse.toString());
+            }else {
+            	QCRestException qcRestException = MarshallingUtils.marshal(QCRestException.class, putResponse.toString());
+            	          	throw new Exception(qcRestException.getStackTrace());
+            }
+            
             List<TestRun> lastRuns = getXTestRuns(new TestSetTest(entity), 1);
             if (lastRuns.size() == 1) {
                 TestRun lastRun = lastRuns.get(0);
